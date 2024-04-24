@@ -2,8 +2,9 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    path('', views.home, name='posts'),
-    path('post/create', views.create_post, name='post-create'),
-    path('post/edit/<int:id>/', views.edit_post, name='post-edit'),
-    path('post/delete/<int:id>/', views.delete_post, name='post-delete'),
+    path("", views.blog_index, name="blog_index"),
+    path("post/<int:pk>/", views.blog_detail, name="blog_detail"),
+    path("category/<category>/", views.blog_category, name="blog_category"),
+    path("tag/<tag>/", views.blog_tag, name="blog_tag"),
+
 ]

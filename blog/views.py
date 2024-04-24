@@ -1,63 +1,77 @@
+from django.http import HttpResponseRedirect
 from django.shortcuts import render
+from blog.models import Post, Comment, Author, Category, Tag
+from blog.forms import CommentForm
 
-# Create your views here.
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib import messages
-from django.contrib.auth.decorators import login_required
-from .models import Post
-from .forms import PostForm
+def blog_index(request):
+    posts = Post.objects.all().order_by("-created_on")
+    context = {
+        "posts": posts,
+    }
+    return render(request, "blog/index.html", context)
 
-@login_required
-def delete_post(request, id):
-    queryset = Post.objects.filter(author=request.user)
-    post = get_object_or_404(queryset, pk=id)
-    context = {'post': post}    
-    
-    if request.method == 'GET':
-        return render(request, 'blog/post_confirm_delete.html',context)
-    elif request.method == 'POST':
-        post.delete()
-        messages.success(request,  'The post has been deleted successfully.')
-        return redirect('posts')
+def blog_category(request, category):
+    posts = Post.objects.filter(
+        categories__name__contains=category
+    ).order_by("-created_on")
+    context = {
+        "category": category,
+        "posts": posts,
+    }
+    return render(request, "blog/category.html", context)
 
-@login_required    
-def edit_post(request, id):
-    queryset = Post.objects.filter(author=request.user)
-    post = get_object_or_404(queryset, pk=id)
+def blog_tag(request, tag):
+    posts = Post.objects.filter(
+        tags__name__contains=tag
+    ).order_by("-created_on")
+    context = {
+        "tag": tag,
+        "posts": posts,
+    }
+    return render(request, "blog/tag.html", context)
 
-    if request.method == 'GET':
-        context = {'form': PostForm(instance=post), 'id': id}
-        return render(request,'blog/post_form.html',context)
-    
-    elif request.method == 'POST':
-        form = PostForm(request.POST, instance=post)
+def blog_author(request, author):
+    posts = Post.objects.filter(
+        author__name__contains=author
+    ).order_by("-created_on")
+    context = {
+        "author": author,
+        "posts": posts,
+    }
+    return render(request, "blog/author.html", context)
+
+
+def blog_detail(request, pk):
+    post = Post.objects.get(pk=pk)
+    form = CommentForm()
+    if request.method == "POST":
+        form = CommentForm(request.POST)
         if form.is_valid():
-            form.save()
-            messages.success(request, 'The post has been updated successfully.')
-            return redirect('posts')
-        else:
-            messages.error(request, 'Please correct the following errors:')
-            return render(request,'blog/post_form.html',{'form':form})
+            comment = Comment(
+                author=form.cleaned_data["author"],
+                body=form.cleaned_data["body"],
+                post=post,
+            )
+            comment.save()
+            return HttpResponseRedirect(request.path_info)
 
-@login_required
-def create_post(request):
-    if request.method == 'GET':
-        context = {'form': PostForm()}
-        return render(request,'blog/post_form.html',context)
-    elif request.method == 'POST':
-        form = PostForm(request.POST)
-        if form.is_valid():
-            user = form.save(commit=False)
-            user.author = request.user
-            user.save()
-            messages.success(request, 'The post has been created successfully.')
-            return redirect('posts')
-        else:
-            messages.error(request, 'Please correct the following errors:')
-            return render(request,'blog/post_form.html',{'form':form})
+    comments = Comment.objects.filter(post=post)
+    context = {
+        "post": post,
+        "comments": comments,
+        "form": CommentForm(),
+    }
+    return render(request, "blog/detail.html", context)
 
 
-def home(request):
-    posts = Post.objects.all()
-    context = {'posts': posts}
-    return render(request, 'blog/home.html', context)
+
+
+
+
+
+
+
+
+
+
+
