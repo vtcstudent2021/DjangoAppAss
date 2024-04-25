@@ -8,7 +8,7 @@ def sign_in(request):
 
     if request.method == 'GET':
         if request.user.is_authenticated:
-            return redirect('posts')
+            return redirect('blog_index')
             
         form = LoginForm()
         return render(request,'users/login.html', {'form': form})
@@ -23,7 +23,7 @@ def sign_in(request):
             if user:
                 login(request, user)
                 messages.success(request,f'Hi {username.title()}, welcome back!')
-                return redirect('posts')
+                return redirect('blog_index')
         
         # form is not valid or user is not authenticated
         messages.error(request,f'Invalid username or password')
@@ -47,7 +47,7 @@ def sign_up(request):
             user.save()
             messages.success(request, 'You have singed up successfully.')
             login(request, user)
-            return redirect('posts')
+            return redirect('blog_index')
         else:
             return render(request, 'users/register.html', {'form': form})
 
