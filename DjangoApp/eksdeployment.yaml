@@ -1,0 +1,49 @@
+# deployment.yaml
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: django-app-deployment
+spec:
+  replicas: 1  
+  selector:
+    matchLabels:
+      app: django-app
+  template:
+    metadata:
+      labels:
+        app: django-app
+    spec:
+      containers:
+      - name: django-app
+        image: jl284760/djangoappass  
+        ports:
+        - containerPort: 8000  
+        env:
+        - name: DATABASE_ENGINE
+          value: django.db.backends.mysql  
+        - name: DATABASE_NAME
+          value: store  
+        - name: DATABASE_USER
+          value: admin  
+        - name: DATABASE_PASSWORD
+          value: 0p3br83vf8zx
+        - name: DATABASE_HOST
+          value: 0p3br83vf8zx
+
+
+---
+# service.yaml
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: django-app-service
+spec:
+  selector:
+    app: django-app
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8000  
+  type: LoadBalancer  
