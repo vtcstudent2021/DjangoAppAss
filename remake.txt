@@ -31,6 +31,6 @@ https://djangocentral.com/building-a-blog-application-with-django/#database-mode
 
 
 
-
+docker exec -it e6333e6688f2 /bin/bash
 
 
